@@ -4,6 +4,8 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, delete
 
+from sqlalchemy import text
+
 from app.core.config import settings
 from app.core.db import engine, init_db
 from app.main import app
@@ -17,6 +19,8 @@ def db() -> Generator[Session, None, None]:
     with Session(engine) as session:
         init_db(session)
         yield session
+        session.execute(text("DELETE FROM record WHERE parent_id IS NOT NULL"))
+        session.execute(text("DELETE FROM record"))
         statement = delete(Item)
         session.execute(statement)
         statement = delete(User)
